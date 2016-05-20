@@ -1,0 +1,11 @@
+[package]
+
+name = "AssassinsGameServer"
+version = "0.0.1"
+authors = [ "Jim Raynor <fudgemutator@gmail.com>" ]
+
+[[bin]]
+
+name = "assassins_game_server"
+
+[dependencies]
