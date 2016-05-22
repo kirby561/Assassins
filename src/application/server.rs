@@ -1,4 +1,6 @@
 
+use application::server_instance::ServerInstance;
+
 #[derive(PartialEq)]
 pub enum ServerState {
     Done,
@@ -9,6 +11,7 @@ pub enum ServerState {
 pub struct Server {
     name: String,
     state: ServerState,
+    servers: Vec<ServerInstance>,
 }
 
 impl Server {
@@ -16,6 +19,7 @@ impl Server {
 		let mut server = Server {
 			name: String::from("DefaultServerName"),
 			state: ServerState::NotListening,
+			servers: Vec::new(),
 		};
 		return server;
 	}

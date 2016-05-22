@@ -13,9 +13,9 @@ pub struct ServerInstance {
     state: ServerInstanceState,
 }
 
-impl Server {
-	pub fn new(id: u64) -> Server {
-		let mut server = Server {
+impl ServerInstance {
+	pub fn new(id: u64) -> ServerInstance {
+		let mut server = ServerInstance {
 			name: String::from("DefaultServerName"),
 			id: id,
 			state: ServerInstanceState::NotInGame,
