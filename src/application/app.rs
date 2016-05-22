@@ -30,11 +30,37 @@ impl App {
 
     fn initialize_commands(&mut self) {
         self.commands.push(Command {
-            name: "NewGame".to_string(),
-            description: "Creates a new game and moves to the game setup state.".to_string(),
-            usage: "NewGame".to_string(),
+            name: "CreateServer".to_string(),
+            description: "Creates a new server instance for players to join.".to_string(),
+            usage: "CreateServer".to_string(),
             command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
-                server.start_new_game(input);
+                let id = server.create_server_instance();
+                println!("Created server with id {}", id);
+            }),
+        });
+        
+        self.commands.push(Command {
+            name: "DestroyServer".to_string(),
+            description: "Destroys the given server.".to_string(),
+            usage: "DestroyServer <ServerInstanceId>".to_string(),
+            command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
+            	if input.len() != 2 {
+            		println!("Invalid arguments.  See usage.");
+            	} else {
+            		let id_result = input[1].trim().parse::<u64>();
+            		match id_result {
+            			Ok(id) => {
+            				if server.destroy_server_instance(id) {
+				                println!("Destroyed server with id {}", id);
+            				} else {
+            					println!("No server found with id {}", id);
+            				}
+            			}
+            			Err(error) => {
+	            			println!("Invalid server id {}", input[1]);
+            			}
+            		}
+            	}
             }),
         });
         
