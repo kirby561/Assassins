@@ -1,7 +1,6 @@
 extern crate time;
 
 use application::player::Player;
-
 use std::collections::LinkedList;
 use self::time::Timespec;
 

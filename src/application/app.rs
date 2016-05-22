@@ -1,7 +1,12 @@
-use std::io;
 
+use std::io;
+use std::io::BufReader;
+use std::io::BufRead;
+use std::fs::File;
+use std::path::Path;
 use application::command::Command;
 use application::server::Server;
+use application::user::User;
 
 #[derive(PartialEq)]
 pub enum AppState {
@@ -45,7 +50,7 @@ impl App {
             	if input.len() != 2 {
             		println!("Invalid arguments.  See usage.");
             	} else {
-            		let id_result = input[1].trim().parse::<u64>();
+            		let id_result = input[1].parse::<u64>();
             		match id_result {
             			Ok(id) => {
             				if server.destroy_server_instance(id) {
@@ -63,22 +68,51 @@ impl App {
         });
         
         self.commands.push(Command {
-            name: "RegisterPlayer".to_string(),
-            description: "Registers a player with the server.  This can be done from any state.".to_string(),
-            usage: "RegisterPlayer <PlayerName> <PathToPhoto>".to_string(),
+            name: "RegisterUser".to_string(),
+            description: "Registers a user with the server.  This can be done from any state.".to_string(),
+            usage: "RegisterUser <PlayerName> <PathToPhoto?>".to_string(),
             command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
-                server.register_player(input);
+            	if input.len() > 1 {
+            		let user_name = input[1];
+            		
+            		// Name is required first input
+		           	let mut user = User::new(user_name);
+		           	
+		           	// Photo?
+		           	if input.len() > 2 {
+		           		user.icon_path = input[2].to_string();
+		           	}
+		           	
+		           	// ?? TODO: Add other fields.
+		           	
+		            if server.register_user(user) {
+		            	println!("Registered {}", user_name);
+		            } else {
+		            	println!("{} was already registered.", user_name);
+		            }
+            	} else {
+            		println!("Invalid input for RegisterUser.  See usage.");
+            	}
             }),
         });
+        
+        self.commands.push(Command {
+            name: "ListUsers".to_string(),
+            description: "Lists all the users currently in the database.".to_string(),
+            usage: "ListUsers".to_string(),
+            command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
+            	server.access_database().list_users();
+            }),
+        });        
     }
     
-    fn run_command(&mut self, input: Vec<&str>) -> bool {
+    fn execute_command(&mut self, input: Vec<&str>) -> bool {
     	// Make sure the input has at least 1 entry
     	if input.len() == 0 {
     		return false;
     	}
     	
-    	let command: &str = input[0].trim();
+    	let command: &str = input[0];
     	let mut command_index = 0;
     	
     	// Find the command // ?? TODO: This should just be a hash table.
@@ -99,6 +133,49 @@ impl App {
     	
     	// Not found
     	return false;
+    }
+    
+    pub fn execute_script(&mut self, script: &str) -> bool {
+    	let f = match File::open(script) {
+		    Ok(file) => {
+		    	let mut result = true;
+		    	let mut file_reader = BufReader::new(&file);
+			    for line in file_reader.lines() {
+			        let l = line.unwrap();
+                    result &= self.handle_input(&l);
+			    }
+			    return result;
+		    },
+		    Err(e) => {
+		        println!("{}", e);
+		        return false;
+		    }
+		};
+    	return false;
+    }
+    
+    pub fn handle_input(&mut self, input: &String) -> bool {
+    	let split_input: Vec<&str> = input.trim().split(' ').collect();
+        
+        // Special case for scripts
+        if split_input.len() > 0 && split_input[0] == "RunScript".to_string() {
+        	if split_input.len() != 2 {
+        		println!("Please provide a script file.");
+        		return false;
+        	} else {
+        		if !self.execute_script(split_input[1]) {
+        			println!("Failed to run the script at {}", split_input[1]);
+        			return false;
+        		}
+        	}
+        } else if split_input.len() > 0 && split_input[0].trim() != "".to_string() {
+        	// Run the command 
+	        if !self.execute_command(split_input) {
+	        	println!("Failed to run the given command.");
+	        	return false;
+	        }
+        }
+        return true;
     }
 
     pub fn exit(&mut self) {
@@ -122,10 +199,7 @@ impl App {
                     let mut input = String::new();
                     io::stdin().read_line(&mut input).unwrap();
 
-                    let split_input: Vec<&str> = input.split(' ').collect();
-                    if !self.run_command(split_input) {
-                    	println!("Failed to run the given command.");
-                    }
+                    self.handle_input(&input);
                 }
                 _ => println!("Other."),
             };

@@ -1,6 +1,7 @@
 
 use application::server_instance::ServerInstance;
 use application::user::User;
+use application::user_database::UserDatabase;
 
 #[derive(PartialEq)]
 pub enum ServerState {
@@ -14,6 +15,7 @@ pub struct Server {
     state: ServerState,
     servers: Vec<ServerInstance>,
     clients: Vec<User>,
+    database: UserDatabase,
     next_id: u64,
 }
 
@@ -24,6 +26,7 @@ impl Server {
 			state: ServerState::NotListening,
 			servers: Vec::new(),
 			clients: Vec::new(),
+			database: UserDatabase::new(),
 			next_id: 0,
 		};
 		return server;
@@ -60,8 +63,16 @@ impl Server {
 		return found_server;
 	}
     
-    pub fn register_player(&self, input: Vec<&str>) {
-    	println!("Register Player.");
+    pub fn register_user(&mut self, user: User) -> bool {
+    	if self.database.user_exists(&user) {
+    		return false;
+    	}
+    	self.database.register_user(user);
+    	return true;
+    }
+    
+    pub fn access_database(&self) -> &UserDatabase {
+    	return &self.database;
     }
     
     pub fn get_state_string(&self) -> String {

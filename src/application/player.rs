@@ -1,5 +1,5 @@
-use std::collections::LinkedList;
 
+use std::collections::LinkedList;
 use application::gps_location::GpsLocation;
 
 pub struct Player {

@@ -35,8 +35,8 @@ impl ServerInstance {
 		println!("TODO: Do whatever we need to do to destroy this server instance.");
 	}
 	
-    pub fn list_players(&self) {
-        println!("Listing players...someday");
+    pub fn list_users(&self) {
+        println!("Listing users...someday");
     }
     
     pub fn start_game(&mut self) {
