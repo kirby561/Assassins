@@ -1,4 +1,8 @@
 
+use application::user::User;
+use application::game::Game;
+use application::player::Player;
+
 #[derive(PartialEq)]
 pub enum ServerInstanceState {
     Done,
@@ -11,14 +15,18 @@ pub struct ServerInstance {
     name: String,
     id: u64,
     state: ServerInstanceState,
+    connected_users: Vec<User>,	
+    game: Game,
 }
 
 impl ServerInstance {
 	pub fn new(id: u64) -> ServerInstance {
-		let mut server = ServerInstance {
+		let server = ServerInstance {
 			name: String::from("DefaultServerName"),
 			id: id,
-			state: ServerInstanceState::NotInGame,
+			state: ServerInstanceState::GameSetup,
+			connected_users: Vec::new(),
+			game: Game::new(),
 		};
 		return server;
 	}
@@ -30,9 +38,28 @@ impl ServerInstance {
     pub fn list_players(&self) {
         println!("Listing players...someday");
     }
-    	
-    pub fn start_new_game(&self) {
+    
+    pub fn start_game(&mut self) {
         println!("The game has been started!");
+        self.state = ServerInstanceState::InGame;
+        
+        // Grab whatever users are connected and start the game
+        self.game.clear_players();
+     
+	    for user in self.connected_users.iter() {
+	    	let new_player = Player::new(user.user_name.clone(), user.icon_path.clone());
+	    	self.game.add_player(new_player);
+	    }
+	    
+	    self.game.start();
+    }
+    
+    pub fn add_user(&mut self, user: User) {
+    	self.connected_users.push(user);
+    }
+    
+    pub fn remove_user(&mut self, user: User) {
+    	// ?? TODO
     }
     
     pub fn get_state_string(&self) -> String {

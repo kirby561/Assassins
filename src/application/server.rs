@@ -1,5 +1,6 @@
 
 use application::server_instance::ServerInstance;
+use application::user::User;
 
 #[derive(PartialEq)]
 pub enum ServerState {
@@ -12,6 +13,7 @@ pub struct Server {
     name: String,
     state: ServerState,
     servers: Vec<ServerInstance>,
+    clients: Vec<User>,
     next_id: u64,
 }
 
@@ -21,6 +23,7 @@ impl Server {
 			name: String::from("DefaultServerName"),
 			state: ServerState::NotListening,
 			servers: Vec::new(),
+			clients: Vec::new(),
 			next_id: 0,
 		};
 		return server;

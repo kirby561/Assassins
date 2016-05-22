@@ -1,6 +1,4 @@
-use std::fmt;
 use std::io;
-use std::collections::LinkedList;
 
 use application::command::Command;
 use application::server::Server;
@@ -95,7 +93,6 @@ impl App {
 	    }
     	
     	if command_index < (*self).commands.len() {	
-	    	println!("Next command: {}", command_index);
 			(*(*self).commands[command_index].command_function)(&mut self.server, input);
 	    	return true;
     	}
