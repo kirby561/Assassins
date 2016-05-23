@@ -1,4 +1,5 @@
 
+use std::collections::HashMap;
 use application::server_instance::ServerInstance;
 use application::user::User;
 use application::user_database::UserDatabase;
@@ -13,7 +14,7 @@ pub enum ServerState {
 pub struct Server {
     name: String,
     state: ServerState,
-    servers: Vec<ServerInstance>,
+    servers: HashMap<u64, ServerInstance>,
     clients: Vec<User>,
     database: UserDatabase,
     next_id: u64,
@@ -24,7 +25,7 @@ impl Server {
 		let mut server = Server {
 			name: String::from("DefaultServerName"),
 			state: ServerState::NotListening,
-			servers: Vec::new(),
+			servers: HashMap::new(),
 			clients: Vec::new(),
 			database: UserDatabase::new(),
 			next_id: 0,
@@ -34,34 +35,56 @@ impl Server {
 	
 	pub fn create_server_instance(&mut self) -> u64 {
 		let id = self.get_next_id();
-		self.servers.push(ServerInstance::new(id));
+		self.servers.insert(id, ServerInstance::new(id));
 		return id;
 	}
 	
 	pub fn destroy_server_instance(&mut self, id: u64) -> bool {
-		let mut server_instance_index = 0;
-		let mut found_server = false;
-    	
-    	// Find the server // ?? TODO: This should just be a hash table or something
-	    for next_server_instance in (*self).servers.iter() {
-	    	// Did we find it?
-	    	if next_server_instance.get_id() == id {
-	    		found_server = true;
-	    		break;
-	    	}
-	    		
-	    	// Nope, increment and continue
-	    	server_instance_index += 1;
-	    }
-	    
-	    // Remove it
-	    if server_instance_index < self.servers.len() {
-	    	self.servers[server_instance_index].destroy();
-	    	self.servers.remove(server_instance_index);
-	    }
-
-		return found_server;
+		match self.servers.remove(&id) {
+			Some(_) => return true,
+			None => return false,
+		}
 	}
+   
+    pub fn join_server_instance(&mut self, instance_id: u64, user_name: String) -> bool {
+    	match self.servers.get_mut(&instance_id) {
+    		Some(mut server_instance) => {
+    			match self.database.get_user(user_name) {
+		    		Some(user) => { 
+		    			if server_instance.add_user(user) {
+		    				return true;
+		    			} else {
+		    				return false;
+		    			}
+		    		},
+		    		None => return false,
+		    	}
+    		},
+    		None => return false,
+    	}
+    	
+    	return true;
+    }
+    
+    pub fn leave_server_instance(&mut self, instance_id: u64, user_name: String) -> bool {
+    	match self.servers.get_mut(&instance_id) {
+    		Some(mut server_instance) => {
+    			match self.database.get_user(user_name) {
+		    		Some(user) => { 
+		    			if server_instance.remove_user(user.clone()) {
+		    				return true;
+		    			} else {
+		    				return false;
+		    			}
+		    		},
+		    		None => return false,
+		    	}
+    		},
+    		None => return false,
+    	}
+    	
+    	return true;
+    }
     
     pub fn register_user(&mut self, user: User) -> bool {
     	if self.database.user_exists(&user) {

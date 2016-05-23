@@ -1,4 +1,5 @@
 
+use std::collections::HashMap;
 use application::user::User;
 use application::game::Game;
 use application::player::Player;
@@ -15,7 +16,7 @@ pub struct ServerInstance {
     name: String,
     id: u64,
     state: ServerInstanceState,
-    connected_users: Vec<User>,	
+    connected_users: HashMap<String, User>,	
     game: Game,
 }
 
@@ -25,7 +26,7 @@ impl ServerInstance {
 			name: String::from("DefaultServerName"),
 			id: id,
 			state: ServerInstanceState::GameSetup,
-			connected_users: Vec::new(),
+			connected_users: HashMap::new(),
 			game: Game::new(),
 		};
 		return server;
@@ -46,7 +47,7 @@ impl ServerInstance {
         // Grab whatever users are connected and start the game
         self.game.clear_players();
      
-	    for user in self.connected_users.iter() {
+	    for (key, user) in self.connected_users.iter() {
 	    	let new_player = Player::new(user.user_name.clone(), user.icon_path.clone());
 	    	self.game.add_player(new_player);
 	    }
@@ -54,12 +55,20 @@ impl ServerInstance {
 	    self.game.start();
     }
     
-    pub fn add_user(&mut self, user: User) {
-    	self.connected_users.push(user);
+    pub fn add_user(&mut self, user: &User) -> bool {
+    	if self.connected_users.contains_key(&user.user_name) {
+    		return false;
+    	}
+    	let user_clone = user.clone();
+    	self.connected_users.insert(user_clone.user_name.clone(), user_clone);
+    	return true;
     }
     
-    pub fn remove_user(&mut self, user: User) {
-    	// ?? TODO
+    pub fn remove_user(&mut self, user: User) -> bool {
+    	match self.connected_users.remove(&user.user_name) {
+			Some(_) => return true,
+			None => return false,
+		}
     }
     
     pub fn get_state_string(&self) -> String {

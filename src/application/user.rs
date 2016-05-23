@@ -1,5 +1,5 @@
 
-#[derive(Hash, Eq, PartialEq, Debug)]
+#[derive(Hash, Clone, Eq, PartialEq, Debug)]
 pub enum Sex {
 	Female,
 	Male,
@@ -7,7 +7,7 @@ pub enum Sex {
 	Unspecified,
 }
 
-#[derive(Hash, Eq, PartialEq, Debug)]
+#[derive(Hash, Clone, Eq, PartialEq, Debug)]
 pub struct User {
     pub user_name: String,
     pub icon_path: String,

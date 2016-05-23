@@ -68,6 +68,58 @@ impl App {
         });
         
         self.commands.push(Command {
+            name: "JoinServer".to_string(),
+            description: "Joins the specified server with the specified user.".to_string(),
+            usage: "JoinServer <ServerInstanceId> <UserName>".to_string(),
+            command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
+            	if input.len() != 3 {
+            		println!("Invalid arguments.  See usage.");
+            	} else {
+            		let id_result = input[1].parse::<u64>();
+            		match id_result {
+            			Ok(id) => {
+							// Join the server
+							if server.join_server_instance(id, input[2].to_string()) {
+							    println!("{} has joined server instance {}", input[2], id);
+		            		} else {
+		            			println!("No server found with id {} or {} is already in that server.", id, input[2]);
+		            		}
+            			}
+            			Err(error) => {
+	            			println!("Invalid server id {}", input[1]);
+            			}
+            		}
+            	}
+            }),
+        });
+        
+        self.commands.push(Command {
+            name: "LeaveServer".to_string(),
+            description: "Leaves the specified server for the specified user.".to_string(),
+            usage: "LeaveServer <ServerInstanceId> <UserName>".to_string(),
+            command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
+            	if input.len() != 3 {
+            		println!("Invalid arguments.  See usage.");
+            	} else {
+            		let id_result = input[1].parse::<u64>();
+            		match id_result {
+            			Ok(id) => {
+							// Join the server
+							if server.leave_server_instance(id, input[2].to_string()) {
+							    println!("{} has left server instance {}", input[2], id);
+		            		} else {
+		            			println!("No server found with id {} or {} is not in that server.", id, input[2]);
+		            		}
+            			}
+            			Err(error) => {
+	            			println!("Invalid server id {}", input[1]);
+            			}
+            		}
+            	}
+            }),
+        });
+        
+        self.commands.push(Command {
             name: "RegisterUser".to_string(),
             description: "Registers a user with the server.  This can be done from any state.".to_string(),
             usage: "RegisterUser <PlayerName> <PathToPhoto?>".to_string(),

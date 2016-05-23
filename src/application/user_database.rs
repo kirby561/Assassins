@@ -23,6 +23,10 @@ impl UserDatabase {
 		self.users.insert(user.user_name.to_string(), user);
 	}
 	
+	pub fn get_user(&self, user_name: String) -> Option<&User> {
+		return self.users.get(&user_name);
+	}
+	
 	pub fn list_users(&self) {
 		println!("Users:");
 		for (key, user) in &self.users {
