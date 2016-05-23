@@ -1,4 +1,4 @@
-This is a server for an in-person game I'm tentatively called "Assassins".
+This is a server for an in-person game I'm tentatively calling "Assassins".
 
 The Game
 ---------
