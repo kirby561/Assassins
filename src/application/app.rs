@@ -8,6 +8,8 @@ use application::command::Command;
 use application::server::Server;
 use application::user::User;
 
+use application::player::Player;
+
 #[derive(PartialEq)]
 pub enum AppState {
     Running,
@@ -120,6 +122,87 @@ impl App {
         });
         
         self.commands.push(Command {
+            name: "StartGame".to_string(),
+            description: "Starts the game for the specified server.".to_string(),
+            usage: "StartGame <ServerInstanceId>".to_string(),
+            command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
+            	if input.len() != 2 {
+            		println!("Invalid arguments.  See usage.");
+            	} else {
+            		let id_result = input[1].parse::<u64>();
+            		match id_result {
+            			Ok(id) => {
+							match server.get_server_instance(id) {
+								Some(mut server_instance) => server_instance.start_game(),
+								None => println!("No server with id {} exists.", id),
+							}
+            			}
+            			Err(error) => {
+	            			println!("Invalid server id {}", input[1]);
+            			}
+            		}
+            	}
+            }),
+        });
+        
+        self.commands.push(Command {
+            name: "ListPlayers".to_string(),
+            description: "Lists the players in the specified server.".to_string(),
+            usage: "ListPlayers <ServerInstanceId>".to_string(),
+            command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
+            	if input.len() != 2 {
+            		println!("Invalid arguments.  See usage.");
+            	} else {
+            		let id_result = input[1].parse::<u64>();
+            		match id_result {
+            			Ok(id) => {
+							match server.get_server_instance(id) {
+								Some(mut server_instance) => println!("Players: {:?}", server_instance.get_game().get_players()),
+								None => println!("No server with id {} exists.", id),
+							}
+            			}
+            			Err(error) => {
+	            			println!("Invalid server id {}", input[1]);
+            			}
+            		}
+            	}
+            }),
+        });
+        
+        self.commands.push(Command {
+            name: "ReportKill".to_string(),
+            description: "Reports that the first use killed the second in the given game.".to_string(),
+            usage: "ReportKill <ServerInstanceId> <UserNameOfKiller> <UserNameOfKilled>".to_string(),
+            command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
+            	if input.len() != 4 {
+            		println!("Invalid arguments.  See usage.");
+            	} else {
+            		let id_result = input[1].parse::<u64>();
+            		match id_result {
+            			Ok(id) => {
+							match server.get_server_instance(id) {
+								Some(mut server_instance) => {
+									// Get the players
+									let killer_user_name = input[2].to_string();
+									let killed_user_name = input[3].to_string();
+									
+									// For now, just increment the killer's score.
+									//    TODO: Remove the target from the killer and assign another one.
+									//          Also check that the player they are reporting they killed is actually their target.
+									server_instance.report_kill(killer_user_name, killed_user_name);
+								},
+								None => println!("No server with id {} exists.", id),
+							}
+            			}
+            			Err(error) => {
+	            			println!("Invalid server id {}", input[1]);
+            			}
+            		}
+            	}
+            }),
+        });
+        
+        self.commands.push(Command {
             name: "RegisterUser".to_string(),
             description: "Registers a user with the server.  This can be done from any state.".to_string(),
             usage: "RegisterUser <PlayerName> <PathToPhoto?>".to_string(),
@@ -155,7 +238,7 @@ impl App {
             command_function: Box::new(|server: &mut Server, input: Vec<&str>| {
             	server.access_database().list_users();
             }),
-        });        
+        });
     }
     
     fn execute_command(&mut self, input: Vec<&str>) -> bool {
@@ -239,7 +322,7 @@ impl App {
         println!("Printing the options for the current state.");
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self) {	
     	self.app_state = AppState::Running;
     	
         while self.app_state != AppState::Done {

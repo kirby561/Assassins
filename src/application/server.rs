@@ -86,6 +86,10 @@ impl Server {
     	return true;
     }
     
+    pub fn get_server_instance(&mut self, instance_id: u64) -> Option<&mut ServerInstance> {
+    	return self.servers.get_mut(&instance_id);
+    }
+    
     pub fn register_user(&mut self, user: User) -> bool {
     	if self.database.user_exists(&user) {
     		return false;

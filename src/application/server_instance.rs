@@ -55,6 +55,10 @@ impl ServerInstance {
 	    self.game.start();
     }
     
+    pub fn get_game(&mut self) -> &mut Game {
+    	return &mut self.game;
+    }
+    
     pub fn add_user(&mut self, user: &User) -> bool {
     	if self.connected_users.contains_key(&user.user_name) {
     		return false;
@@ -70,6 +74,14 @@ impl ServerInstance {
 			None => return false,
 		}
     }
+    
+    pub fn report_kill(&mut self, killer_user_name: String, killed_user_name: String) {
+    	let players = self.game.get_players_mut();
+    	match players.get_mut(&killer_user_name) {
+    		Some(killer_player) => killer_player.increment_score(),
+    		None => println!("Player {} was not found in server instance {}.", killer_user_name, self.id),
+    	}
+    } 
     
     pub fn get_state_string(&self) -> String {
     	match self.state {

@@ -2,6 +2,7 @@
 use std::collections::LinkedList;
 use application::gps_location::GpsLocation;
 
+#[derive(Hash, Clone, Eq, PartialEq, Debug)]
 pub struct Player {
     name: String,
     icon_path: String,
@@ -22,5 +23,17 @@ impl Player {
 			score: 0,
 		};
 		return player;
+	}
+	
+	pub fn increment_score(&mut self) {
+		self.score += 1;
+	}
+	
+	pub fn get_score(&self) -> i32 {
+		return self.score;
+	}
+	
+	pub fn get_name(&self) -> &String {
+		return &self.name;
 	}
 }

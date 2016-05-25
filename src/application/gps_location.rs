@@ -1,4 +1,5 @@
 
+#[derive(Hash, Clone, Eq, PartialEq, Debug)]
 pub struct GpsLocation {
     pub latitude: i64,
     pub longitude: i64,
