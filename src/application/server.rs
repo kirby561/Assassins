@@ -22,7 +22,7 @@ pub struct Server {
 
 impl Server {
 	pub fn new() -> Server {
-		let mut server = Server {
+		let server = Server {
 			name: String::from("DefaultServerName"),
 			state: ServerState::NotListening,
 			servers: HashMap::new(),
@@ -62,13 +62,11 @@ impl Server {
     		},
     		None => return false,
     	}
-    	
-    	return true;
     }
     
     pub fn leave_server_instance(&mut self, instance_id: u64, user_name: String) -> bool {
     	match self.servers.get_mut(&instance_id) {
-    		Some(mut server_instance) => {
+    		Some(server_instance) => {
     			match self.database.get_user(user_name) {
 		    		Some(user) => { 
 		    			if server_instance.remove_user(user.clone()) {
@@ -82,8 +80,6 @@ impl Server {
     		},
     		None => return false,
     	}
-    	
-    	return true;
     }
     
     pub fn get_server_instance(&mut self, instance_id: u64) -> Option<&mut ServerInstance> {

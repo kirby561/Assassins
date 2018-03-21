@@ -3,12 +3,9 @@ use std::io;
 use std::io::BufReader;
 use std::io::BufRead;
 use std::fs::File;
-use std::path::Path;
 use application::command::Command;
 use application::server::Server;
 use application::user::User;
-
-use application::player::Player;
 
 #[derive(PartialEq)]
 pub enum AppState {
@@ -62,7 +59,7 @@ impl App {
             				}
             			}
             			Err(error) => {
-	            			println!("Invalid server id {}", input[1]);
+	            			println!("Invalid server id {}.  Error: {}", input[1], error);
             			}
             		}
             	}
@@ -88,7 +85,7 @@ impl App {
 		            		}
             			}
             			Err(error) => {
-	            			println!("Invalid server id {}", input[1]);
+	            			println!("Invalid server id {}, Error: {}", input[1], error);
             			}
             		}
             	}
@@ -271,7 +268,7 @@ impl App {
     }
     
     pub fn execute_script(&mut self, script: &str) -> bool {
-    	let f = match File::open(script) {
+    	match File::open(script) {
 		    Ok(file) => {
 		    	let mut result = true;
 		    	let mut file_reader = BufReader::new(&file);
@@ -286,7 +283,6 @@ impl App {
 		        return false;
 		    }
 		};
-    	return false;
     }
     
     pub fn handle_input(&mut self, input: &String) -> bool {

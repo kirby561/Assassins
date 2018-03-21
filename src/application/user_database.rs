@@ -9,10 +9,10 @@ pub struct UserDatabase {
 
 impl UserDatabase {
 	pub fn new() -> UserDatabase {
-		let userDatabase = UserDatabase {
+		let user_database = UserDatabase {
 			users: HashMap::new(),
 		};
-		return userDatabase;
+		return user_database;
 	}
 	
 	pub fn user_exists(&self, user: &User) -> bool {

@@ -7,10 +7,10 @@ pub struct GpsLocation {
 
 impl GpsLocation {
 	pub fn new() -> GpsLocation {
-		let gpsLocation = GpsLocation {
+		let gps_location = GpsLocation {
 			latitude: 0,
 			longitude: 0,
 		};
-		return gpsLocation;
+		return gps_location;
 	}
 }
